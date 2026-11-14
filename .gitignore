@@ -1,0 +1,13 @@
+@'
+venv/
+__pycache__/
+*.pyc
+.env
+*.db
+heatmap_output.png
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.pt
+'@ | Set-Content -Encoding utf8 .gitignore
