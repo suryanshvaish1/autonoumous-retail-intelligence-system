@@ -1,325 +1,779 @@
 # 🛒 Autonomous Retail Intelligence System
+### AI-Powered Smart Retail Store Monitoring and Automation Using Computer Vision, IoT and Embedded Systems
 
-An end-to-end computer vision and predictive analytics platform designed for retail stores. The system tracks customer footfall, dwell time, and spatial movement in real time using **YOLOv8** and **DeepSORT**, logs behavioral metrics into SQLite databases, and translates raw video feeds into actionable business insights via an interactive **Streamlit** and **FastAPI** executive dashboard.
+An intelligent **AI + IoT + Computer Vision platform** designed to transform traditional retail stores into smart, data-driven environments.
+
+The system combines real-time customer detection, multi-object tracking, spatial analytics, machine learning, embedded electronics and IoT-based monitoring to convert CCTV footage and sensor data into actionable retail intelligence.
+
+Using **YOLOv8, DeepSORT, ESP32, Python, FastAPI and Streamlit**, the platform monitors customer movement, calculates zone-specific dwell times, analyzes store traffic, generates foot-traffic heatmaps and provides intelligent operational recommendations.
+
+The electronics extension integrates physical sensors, an LCD display, LEDs and a buzzer to create a complete hardware-software retail monitoring prototype.
 
 ---
 
-## 🏗️ System Architecture & Block Diagram
+# 📌 1. Project Overview
 
-The system operates across four sequential stages—from raw optical video ingestion to executive business intelligence.
+Traditional retail stores often lack intelligent systems to understand customer movement, identify crowded areas and analyze customer engagement.
+
+The Autonomous Retail Intelligence System addresses these challenges by combining computer vision, machine learning and embedded electronics.
+
+The system is designed around three major components:
+
+### 1. Computer Vision & Artificial Intelligence
+
+- Real-time person detection using YOLOv8.
+- Multi-object tracking using DeepSORT.
+- Customer movement tracking.
+- Zone-specific dwell-time calculation.
+- Foot-traffic heatmap generation.
+- Estimated demographic classification.
+- Predictive purchase analytics.
+
+### 2. IoT & Embedded Electronics
+
+- ESP32-based sensor integration.
+- IR-based entry and exit detection.
+- HC-SR04 ultrasonic distance measurement.
+- PIR-based motion detection.
+- Real-time visitor counter.
+- LCD-based information display.
+- LED-based occupancy indicators.
+- Buzzer-based alert system.
+
+### 3. Backend & Business Intelligence
+
+- FastAPI REST backend.
+- SQLite database.
+- Streamlit executive dashboard.
+- Machine learning analytics.
+- AI-powered retail recommendations.
+- Customer behavior analysis.
+- Store performance monitoring.
+
+---
+
+# 🏗️ 2. Complete System Architecture
+
+The system is organized into five major layers.
 
 ```text
-+-----------------------------------------------------------------------------------+
-| 1. VIDEO INGESTION & EDGE HARDWARE                                                |
-|    [IP CCTV / RTSP Stream / Local MP4 Video]                                      |
-+-----------------------------------------+-----------------------------------------+
-                                          |
-                                          v
-+-----------------------------------------------------------------------------------+
-| 2. COMPUTER VISION & TRACKING ENGINE (vision_pipeline.py)                         |
-|    [YOLOv8n Person Detection] ---> [DeepSORT Multi-Object Tracking]               |
-|               |                                     |                             |
-|               v                                     v                             |
-|    [Gaussian Spatial Heatmap]      [Zone Dwell-Time & Footfall Logger]            |
-|        (heatmap_output.png)                  (zones.json calibration)             |
-+-----------------------------------------+-----------------------------------------+
-                                          |
-                                          v
-+-----------------------------------------------------------------------------------+
-| 3. DATA STORAGE & SYNTHETIC SIMULATION LAYER                                      |
-|    [video_data.db (Live Logs)]  <--->  [generator.py / retail_data.db (75d Mock)] |
-+-----------------------------------------+-----------------------------------------+
-                                          |
-                                          v
-+-----------------------------------------------------------------------------------+
-| 4. ANALYTICS, API & EXECUTIVE DASHBOARD (api.py & dashboard.py)                   |
-|    +---------------------------+  +------------------------+  +----------------+  |
-|    | FastAPI REST Endpoints    |  | ML & Optimization Lab  |  | Gemini AI      |  |
-|    | - Telemetry & Zone Stats  |  | - Purchase Prediction  |  | Retail Advisor |  |
-|    +---------------------------+  | - Knapsack Budget Opt. |  +----------------+  |
-|                                   | - 7-Day Traffic & A/B  |                      |
-|                                   +------------------------+                      |
-+-----------------------------------------------------------------------------------+
+                  SMART RETAIL STORE
+                          |
+             +------------+------------+
+             |                         |
+             v                         v
+       CCTV / WEBCAM              ELECTRONIC SENSORS
+             |                         |
+             v                         v
+       COMPUTER VISION                 ESP32
+             |                         |
+             v                         v
+          YOLOv8                  SENSOR PROCESSING
+             |                         |
+             v                         |
+          DeepSORT                      |
+             |                         |
+             v                         |
+       CUSTOMER TRACKING                |
+             |                         |
+             +------------+------------+
+                          |
+                          v
+                   PYTHON BACKEND
+                          |
+              +-----------+-----------+
+              |                       |
+              v                       v
+         SQLite Database        Analytics Engine
+              |                       |
+              +-----------+-----------+
+                          |
+                          v
+                      FastAPI
+                          |
+                          v
+                  Streamlit Dashboard
+                          |
+              +-----------+-----------+
+              |           |           |
+              v           v           v
+             LCD         LED        BUZZER
+              |           |           |
+              +-----------+-----------+
+                          |
+                          v
+                 STORE MANAGER
 ```
 
-### Block Diagram Workflow Explanation
+## Architecture Workflow
 
-1. **Video Ingestion:** Raw footage is captured either via live RTSP IP CCTV camera feeds or uploaded MP4 test files.
+### Layer 1: Video Ingestion
 
-2. **Computer Vision & Tracking Engine (`vision_pipeline.py`):**
-   - Every video frame passes through **YOLOv8n** to detect human bounding boxes.
-   - **DeepSORT** assigns persistent tracking IDs across consecutive frames so individual shoppers are not double-counted.
-   - Foot coordinates are checked against polygon boundaries defined in `zones.json` to calculate exact dwell times.
-   - Accumulated coordinates generate `heatmap_output.png`.
+The system receives video from:
 
-3. **Data Storage & Simulation (`video_data.db` & `generator.py`):**
-   - Live visitor sessions exceeding the minimum dwell threshold are committed to SQLite (`video_data.db`).
-   - For multi-week forecasting, back-testing, and model training, `generator.py` supplies realistic 75-day retail behavioral datasets (`retail_data.db`).
+- CCTV/IP cameras.
+- RTSP video streams.
+- USB webcams.
+- Pre-recorded MP4 videos.
 
-4. **API & Executive Dashboard (`api.py` & `dashboard.py`):**
-   - `api.py` exposes structured REST endpoints for external integrations and telemetry queries.
-   - `dashboard.py` renders the 8-tab Streamlit command center, running Gradient Boosting purchase classifiers, multiple-choice knapsack budget optimization, time-series staffing forecasts, K-Means customer segmentation, and Google Gemini AI strategic recommendations.
+OpenCV captures and processes video frames.
+
+### Layer 2: Computer Vision & Tracking
+
+The computer vision pipeline uses:
+
+**YOLOv8:**
+- Detects people in video frames.
+- Identifies bounding boxes.
+- Extracts detection confidence scores.
+
+**DeepSORT:**
+- Assigns unique tracking IDs.
+- Maintains visitor identities across frames.
+- Tracks movement between store zones.
+- Helps prevent duplicate visitor counting.
+
+### Layer 3: Embedded Electronics & IoT
+
+The ESP32 communicates with connected electronic sensors.
+
+It receives information from:
+
+- IR sensors.
+- Ultrasonic sensors.
+- PIR motion sensors.
+
+Based on the sensor readings, it can:
+
+- Detect entrance and exit events.
+- Monitor movement.
+- Measure distance.
+- Update visitor counts.
+- Trigger occupancy alerts.
+
+The ESP32 communicates with the Python backend through Wi-Fi or serial communication.
+
+### Layer 4: Data Processing & Storage
+
+The backend combines:
+
+- Computer vision telemetry.
+- Sensor readings.
+- Visitor movement data.
+- Dwell-time information.
+- Historical retail analytics.
+
+SQLite stores the processed information.
+
+### Layer 5: Dashboard & Automation
+
+The Streamlit dashboard displays:
+
+- Total visitors.
+- Store occupancy.
+- Zone-specific dwell times.
+- Customer movement.
+- Foot-traffic heatmaps.
+- Predictive analytics.
+- Operational recommendations.
+
+The electronic outputs provide additional physical feedback through LCD, LEDs and buzzer alerts.
 
 ---
 
-## ✨ Key Features
+# ✨ 3. Key Features
 
-- **Real-Time Multi-Object Tracking:** Detects and tracks unique shoppers across customizable store zones (`Entrance Corridor`, `Main Display Shelf Zone`, `Checkout Counter`) using YOLOv8 and DeepSORT.
-- **Spatial Movement Heatmaps:** Automatically generates Gaussian movement heatmaps (`heatmap_output.png`) highlighting high-traffic corridors and engagement hotspots.
-- **Predictive Purchase Modeling:** Evaluates visitor purchase probability using a Gradient Boosting classifier trained on dwell time, zone activity, and demographic features.
-- **Revenue & Budget Optimization:** Uses dynamic programming (multiple-choice knapsack solver) to recommend the highest-ROI marketing and store-layout interventions within a fixed budget.
-- **7-Day Footfall Forecasting & Staffing:** Back-tests time-series forecasting models (Seasonal Average vs. Ridge Regression) to predict upcoming store traffic and calculate optimal hourly staff schedules.
-- **A/B Test Planner & Customer Segmentation:** Uses K-Means clustering to segment shoppers by intent and calculates statistically valid sample sizes for in-store promotional experiments.
-- **AI Retail Advisor:** Integrates Google Gemini to provide natural-language executive summaries, multi-period comparisons, and interactive Q&A.
+## Computer Vision Features
 
----
+- 🎯 Real-Time Person Detection using YOLOv8.
+- 🧭 Multi-Object Tracking using DeepSORT.
+- 📍 Zone / ROI Detection.
+- ⏱️ Visitor Dwell-Time Analytics.
+- 🗺️ 2D Foot-Traffic Heatmaps.
+- 🧑 Estimated Demographic Classification.
+- 👥 Customer Movement Analysis.
 
-## 📁 Codebase & Module Breakdown
+## Machine Learning Features
 
-Below is a detailed breakdown of what each core Python module in the repository analyzes and executes.
+- 📈 Predictive Purchase Modeling.
+- 📊 Customer Segmentation using K-Means.
+- 🔮 Seven-Day Footfall Forecasting.
+- 💰 Revenue and Budget Optimization.
+- 🧪 A/B Testing Planner.
+- 📉 Model Performance Evaluation.
 
-### 1. `vision_pipeline.py` — Computer Vision & Spatial Telemetry
+## Electronics & IoT Features
 
-- Processes store CCTV video feeds frame by frame using YOLOv8 for person detection and DeepSORT for multi-object tracking.
-- Evaluates shopper foot positions against custom spatial boundaries (`zones.json`).
-- Measures exact dwell times per zone.
-- Renders Gaussian movement heatmaps.
-- Writes verified visitor session logs into `video_data.db`.
+- 🔌 ESP32 Microcontroller Integration.
+- 🚶 IR-Based Entry and Exit Detection.
+- 📡 HC-SR04 Distance Measurement.
+- 🏃 PIR Motion Detection.
+- 🔢 Automatic Visitor Counting.
+- 🖥️ LCD-Based Store Monitoring.
+- 🟢 Green LED Occupancy Indicator.
+- 🔴 Red LED Alert Indicator.
+- 🔔 Buzzer-Based Notifications.
 
-### 2. `dashboard.py` — Executive Analytics & ML Interface
+## Backend & Dashboard Features
 
-- Powers the interactive 8-tab Streamlit user interface.
-- Ingests either live camera logs (`video_data.db`) or 75-day historical datasets.
-- Analyzes traffic patterns, demographic distributions, and zone dwell metrics.
-- Executes Gradient Boosting purchase probability predictions.
-- Runs dynamic programming (knapsack) budget optimizations.
-- Performs K-Means customer clustering.
-- Evaluates model ROC-AUC/calibration metrics.
-- Connects with Google Gemini for AI-driven store recommendations.
-
-### 3. `api.py` — Backend Telemetry & REST Service
-
-- Manages the FastAPI backend server and RESTful endpoints.
-- Queries and aggregates store telemetry, zone performance metrics, visitor logs, and forecasting outputs from the underlying SQLite databases.
-- Serves clean JSON responses for external clients and microservices.
-
-### 4. `generator.py` — Synthetic Retail Data & Behavioral Simulator
-
-- Models and generates realistic multi-week retail datasets covering 75 days of:
-  - Customer footfall
-  - Age/gender demographics
-  - Zone dwell times
-  - Promotional lift
-  - Purchase outcomes
-- Provides a statistically rich baseline for training machine learning classifiers, running 14-day forecasting back-tests, and demonstrating full-scale dashboard analytics when only short CCTV clips are available.
+- ⚡ FastAPI REST Backend.
+- 🗄️ SQLite Database.
+- 📊 Interactive Streamlit Dashboard.
+- 🤖 Gemini AI Retail Advisor.
+- 📄 Retail Analytics Reporting.
+- 📥 Data Export.
+- 📡 Sensor Data Integration.
 
 ---
 
-## 💻 Hardware Architecture (Edge & Deployment Setup)
+# 🎥 4. Computer Vision & AI Pipeline
 
-While the system can run locally on a standard laptop using pre-recorded video files, deploying it in a live physical retail environment requires the following hardware components.
+## 4.1 Video Ingestion
 
-### 1. Edge Compute & Processing Unit
+The system supports different video input sources:
 
-- **Primary Edge Node:** NVIDIA Jetson Orin Nano (8GB) / Jetson Xavier NX, or a dedicated local workstation with an NVIDIA GTX/RTX GPU (minimum 4GB VRAM) for real-time YOLOv8 inference at 30+ FPS.
-- **CPU Fallback Option:** Intel Core i5/i7 (11th Gen or newer) or AMD Ryzen 5/7 with at least 16GB RAM (suitable for frame-skipped processing).
-- **Storage:** 256GB+ NVMe SSD for storing local SQLite databases (`video_data.db`), model weights, and rolling video buffers.
+- Pre-recorded MP4 videos.
+- USB webcams.
+- RTSP/IP CCTV streams.
 
-### 2. Optical & Camera Hardware
+OpenCV's `VideoCapture` reads the video frames sequentially.
 
-- **IP CCTV Cameras:** 1080p (Full HD) or 4K PoE (Power over Ethernet) wide-angle dome/bullet cameras supporting RTSP (Real-Time Streaming Protocol) streams.
-- **Lens Specifications:** 2.8mm wide-angle lens (90°–110° Field of View) mounted overhead at a 30°–45° downward tilt to minimize occlusion and accurately capture foot coordinates within defined zones.
-- **Low-Light / IR Capability:** Built-in Infrared (IR) night vision and WDR (Wide Dynamic Range) to handle varying store lighting conditions near glass entrances.
+## 4.2 Person Detection — YOLOv8
 
-### 3. Networking & Power Infrastructure
+YOLOv8 is responsible for detecting people in the video.
 
-- **PoE Network Switch:** 8-Port Gigabit PoE+ Switch to power multiple IP cameras and transmit high-bitrate video streams over single Cat6 Ethernet cables.
-- **UPS (Uninterruptible Power Supply):** 1000VA / 600W Line-Interactive UPS to prevent database corruption and ensure continuous tracking during brief power fluctuations.
+The processing pipeline:
 
-### 4. Optional In-Store Engagement Peripherals
+1. Captures a video frame.
+2. Sends the frame to YOLOv8.
+3. Detects objects.
+4. Filters detections belonging to the person class.
+5. Extracts bounding boxes and confidence scores.
 
-- **Digital Signage Displays:** Commercial IPS screens placed in the *Main Display Shelf Zone* or *Entrance Corridor* to trigger dynamic promotions when dwell time or footfall thresholds are met.
+The detected people are then passed to the tracking module.
 
----
+## 4.3 Multi-Object Tracking — DeepSORT
 
-## 🛠️ Software Tech Stack
+DeepSORT maintains the identity of detected people across consecutive frames.
 
-| Category | Technologies |
-|---|---|
-| Programming Language | Python |
-| Computer Vision | OpenCV, Ultralytics YOLOv8, DeepSORT |
-| Machine Learning & Optimization | Scikit-learn, SciPy, NumPy, Pandas, Joblib |
-| Backend & Database | FastAPI, Uvicorn, SQLite, SQLAlchemy |
-| Frontend & Visualization | Streamlit, Plotly |
-| Generative AI | Google Gemini API (`google-genai`) |
-
----
-
-## 🚀 Quick Start & Installation
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/suryanshvaish1/autonoumous-retail-intelligence-system.git
-
-cd autonoumous-retail-intelligence-system
-```
-
-### 2. Set Up Virtual Environment & Install Dependencies
-
-**Windows PowerShell:**
-
-```powershell
-python -m venv venv
-
-.\venv\Scripts\Activate.ps1
-
-python -m pip install --upgrade pip
-
-pip install -r requirements.txt
-```
-
-**Linux / macOS:**
-
-```bash
-python3 -m venv venv
-
-source venv/bin/activate
-
-python -m pip install --upgrade pip
-
-pip install -r requirements.txt
-```
-
-### 3. Calibrate Store Zones (First-Time Setup)
-
-Define custom bounding boxes over your store video feed so the tracker accurately logs zone dwell times.
-
-```bash
-python vision_pipeline.py --video store.mp4 --setup-zones --fresh
-```
-
-**Instructions:**
-
-1. The video window will open.
-2. Drag rectangles with your mouse over each store zone.
-3. Press **ENTER** to confirm each zone.
-4. Press `q` when finished.
-
-The configured zone coordinates are saved in `zones.json`.
-
-### 4. Run the Vision Pipeline
-
-Process a store video feed and populate `video_data.db`.
-
-```bash
-python vision_pipeline.py --video store.mp4 --fresh
-```
-
-The pipeline:
-
-1. Reads the input video.
-2. Detects people using YOLOv8.
-3. Tracks visitors using DeepSORT.
-4. Identifies their positions inside configured store zones.
-5. Calculates zone-specific dwell times.
-6. Generates movement heatmaps.
-7. Stores visitor session data in SQLite.
-
-Generated output:
+For example:
 
 ```text
-video_data.db
+Frame 100 → Person detected → Track ID 17
+
+Frame 101 → Same person detected → Track ID 17
+
+Frame 102 → Same person detected → Track ID 17
+```
+
+This helps the system track individual visitors instead of counting every detection as a new visitor.
+
+## 4.4 Zone / ROI Detection
+
+The store is divided into predefined Regions of Interest (ROI).
+
+Example:
+
+```text
++---------------------------------------+
+|                                       |
+|             SHELF AREA                |
+|                                       |
+|        [ PRODUCT DISPLAY ]            |
+|                                       |
+|---------------------------------------|
+|                                       |
+|             CUSTOMER AREA             |
+|                                       |
+|---------------------------------------|
+|                                       |
+|              CHECKOUT                 |
+|                                       |
++---------------------------------------+
+```
+
+The system checks the tracked person's representative floor position against the configured zone boundaries.
+
+This determines which store area the visitor is occupying.
+
+## 4.5 Dwell-Time Calculation
+
+Dwell time measures how long a visitor stays inside a particular zone.
+
+A basic frame-based calculation is:
+
+```text
+Dwell Time = Frames Spent in Zone / Video FPS
+
+Example:
+
+FPS = 30
+
+Frames in Zone = 300
+
+Dwell Time = 300 / 30
+
+            = 10 seconds
+```
+
+The calculated dwell time is stored as visitor telemetry.
+
+## 4.6 Demographic Classification
+
+A pretrained classification model estimates:
+
+- Gender.
+- Age group.
+
+These predictions can be associated with visitor tracking sessions.
+
+**Note:** These are model estimates, not verified personal attributes.
+
+## 4.7 Foot-Traffic Heatmap
+
+The system collects tracked visitor coordinates and accumulates them into a 2D NumPy grid.
+
+Processing:
+
+```text
+Visitor Coordinates
+        |
+        v
+2D NumPy Grid
+        |
+        v
+Gaussian Smoothing
+        |
+        v
+Intensity Normalization
+        |
+        v
+OpenCV JET Colormap
+        |
+        v
 heatmap_output.png
-zones.json
 ```
 
-### 5. Launch the Backend & Dashboard
+The heatmap helps identify:
 
-Open two separate terminals with the virtual environment activated.
-
-**Terminal 1 — FastAPI Backend:**
-
-```bash
-uvicorn api:app --reload
-```
-
-The API will be available at:
-
-```text
-http://127.0.0.1:8000
-```
-
-Interactive API documentation:
-
-```text
-http://127.0.0.1:8000/docs
-```
-
-**Terminal 2 — Streamlit Dashboard:**
-
-```bash
-streamlit run dashboard.py
-```
-
-Navigate to:
-
-```text
-http://localhost:8501
-```
-
-to explore the retail analytics dashboard.
+- High-traffic areas.
+- Low-traffic areas.
+- Customer hotspots.
+- Congested zones.
+- Product browsing patterns.
+- Checkout congestion.
 
 ---
 
-## 📊 Analytics & Machine Learning
+# 🔌 5. Electronics & IoT Hardware Integration
 
-The platform combines real-time computer vision telemetry with historical and synthetic retail datasets.
+The electronics extension converts the software-based retail intelligence platform into a physical smart retail monitoring prototype.
 
-### Predictive Purchase Modeling
+The ESP32 acts as the primary microcontroller for sensor communication and electronic output control.
 
-Uses a Gradient Boosting classifier to estimate purchase probability based on visitor behavior, including:
+## 5.1 Hardware Components
 
-- Zone activity
-- Dwell time
-- Visitor demographics
-- Historical purchase outcomes
+| Component | Quantity | Purpose |
+|---|---:|---|
+| ESP32 Development Board | 1 | Main microcontroller |
+| HC-SR04 Ultrasonic Sensor | 1 | Distance measurement |
+| IR Sensor Module | 2 | Entry and exit detection |
+| PIR Motion Sensor | 1 | Human movement detection |
+| 16x2 LCD with I2C | 1 | Displays visitor count and occupancy |
+| Buzzer | 1 | Alert notifications |
+| Red LED | 1 | High occupancy indication |
+| Green LED | 1 | Normal occupancy indication |
+| Breadboard | 1 | Circuit assembly |
+| Jumper Wires | 1 set | Component connections |
+| Resistors | As required | Circuit protection |
+| USB Power Supply | 1 | Powers the ESP32 and prototype |
 
-### Revenue & Budget Optimization
+### Estimated Hardware Budget
 
-Uses a multiple-choice knapsack optimization approach to recommend marketing and store-layout interventions within a defined budget.
+| Component | Approximate Cost |
+|---|---:|
+| ESP32 Development Board | ₹400 |
+| HC-SR04 Ultrasonic Sensor | ₹100 |
+| 2 IR Sensors | ₹150 |
+| PIR Sensor | ₹120 |
+| 16x2 LCD with I2C | ₹200 |
+| Buzzer and LEDs | ₹100 |
+| Breadboard and Jumper Wires | ₹200 |
+| Resistors and Accessories | ₹100 |
+| **Estimated Total** | **₹1,370** |
 
-### Footfall Forecasting
+Prices are approximate and may vary depending on the seller.
 
-Uses time-series forecasting approaches, including:
+The budget excludes the laptop and webcam. Existing devices can be reused.
 
-- Seasonal Average
-- Ridge Regression
+## 5.2 ESP32 Microcontroller
 
-The models help estimate upcoming visitor traffic and support staffing decisions.
+The ESP32 is the main controller for the electronic components.
 
-### Customer Segmentation
+Responsibilities:
 
-Uses K-Means clustering to group shoppers based on behavioral patterns and engagement.
+- Reads sensor values.
+- Detects entry and exit events.
+- Measures distance using the ultrasonic sensor.
+- Receives motion detection signals.
+- Updates visitor count.
+- Controls LEDs and buzzer.
+- Communicates with the Python backend.
 
-### A/B Testing
+The ESP32 supports Wi-Fi, which allows communication with the backend without requiring a separate networking module.
 
-Provides an A/B test planning workflow to calculate statistically valid sample sizes for in-store promotional experiments.
+## 5.3 IR Sensors — Entry and Exit Detection
 
-### AI Retail Advisor
+Two IR sensors can be positioned near the store entrance.
+
+Example:
+
+```text
+       STORE ENTRANCE
+
+       CUSTOMER ENTERING
+               |
+               v
+          +---------+
+          | IR 1    |
+          +---------+
+               |
+               v
+          +---------+
+          | IR 2    |
+          +---------+
+               |
+               v
+          STORE INTERIOR
+```
+
+The order in which the sensors detect a person can help determine the direction of movement.
+
+Example:
+
+```text
+IR 1 → IR 2 = Entry
+
+IR 2 → IR 1 = Exit
+```
+
+The ESP32 updates the visitor count accordingly.
+
+This requires suitable sensor positioning and direction-detection logic.
+
+## 5.4 HC-SR04 Ultrasonic Sensor
+
+The HC-SR04 measures the distance between the sensor and an object.
+
+It works by:
+
+1. Sending an ultrasonic pulse.
+2. Waiting for the reflected signal.
+3. Measuring the time taken by the signal.
+4. Calculating the distance.
+
+Distance formula:
+
+```text
+Distance = (Time × Speed of Sound) / 2
+```
+
+Example applications:
+
+- Detecting objects near a checkout.
+- Measuring distance in a designated area.
+- Monitoring whether an area is occupied.
+
+The sensor does not identify people or track individual customers.
+
+## 5.5 PIR Motion Sensor
+
+The PIR sensor detects changes in infrared radiation caused by movement.
+
+It can be used for:
+
+- Detecting movement near store zones.
+- Activating monitoring when movement occurs.
+- Providing additional occupancy signals.
+
+Unlike YOLOv8, a PIR sensor cannot identify individual people.
+
+## 5.6 LCD Display
+
+A 16x2 LCD can display information received from the ESP32.
+
+Example:
+
+```text
++------------------------+
+| SMART RETAIL SYSTEM    |
+|                        |
+| Visitors:  12          |
+| Status: NORMAL         |
++------------------------+
+```
+
+Possible displayed information:
+
+- Current visitor count.
+- Occupancy status.
+- Distance readings.
+- Alert messages.
+
+## 5.7 LED Indicators
+
+Two LEDs provide visual status information.
+
+**Green LED:**
+
+Indicates normal store occupancy.
+
+**Red LED:**
+
+Indicates that occupancy has crossed a configured threshold.
+
+Example:
+
+```text
+Occupancy < Threshold
+
+Green LED = ON
+Red LED   = OFF
+Buzzer    = OFF
+```
+
+```text
+Occupancy >= Threshold
+
+Green LED = OFF
+Red LED   = ON
+Buzzer    = ON
+```
+
+## 5.8 Buzzer Alerts
+
+The buzzer generates an audible notification when configured conditions are met.
+
+Possible alert conditions:
+
+- High store occupancy.
+- Checkout congestion.
+- Configured sensor threshold exceeded.
+
+The actual alert logic is implemented through the ESP32 firmware and backend integration.
+
+---
+
+# 🔗 6. Electronics Circuit & Pin Connections
+
+The following is a suggested ESP32 wiring configuration.
+
+| Component | ESP32 Pin |
+|---|---|
+| IR Sensor 1 OUT | GPIO 18 |
+| IR Sensor 2 OUT | GPIO 19 |
+| HC-SR04 TRIG | GPIO 5 |
+| HC-SR04 ECHO | GPIO 17 |
+| PIR Sensor OUT | GPIO 23 |
+| Buzzer | GPIO 25 |
+| Green LED | GPIO 26 |
+| Red LED | GPIO 27 |
+| LCD SDA | GPIO 21 |
+| LCD SCL | GPIO 22 |
+
+### Important Electrical Safety Notes
+
+- ESP32 GPIO operates at 3.3V logic.
+- HC-SR04 ECHO generally outputs 5V and should be connected through a suitable voltage divider or level shifter.
+- Check the output voltage of IR modules before connecting them to ESP32 GPIO.
+- Use appropriate current-limiting resistors for LEDs.
+- Do not power high-current loads directly from ESP32 GPIO pins.
+- Ensure all connected modules share a suitable common ground.
+
+The wiring configuration may need adjustment depending on the exact ESP32 board and sensor modules.
+
+---
+
+# 📡 7. ESP32 and Python Backend Communication
+
+The ESP32 communicates with the Python backend using Wi-Fi.
+
+Suggested communication flow:
+
+```text
+IR / PIR / ULTRASONIC SENSORS
+              |
+              v
+             ESP32
+              |
+              |
+           Wi-Fi
+              |
+              v
+        Python Backend
+              |
+              v
+          FastAPI
+              |
+              v
+         SQLite DB
+              |
+              v
+       Streamlit Dashboard
+```
+
+The ESP32 can transmit structured JSON sensor readings to the backend.
+
+Example payload:
+
+```json
+{
+    "device_id": "RETAIL_ESP32_01",
+    "visitor_count": 12,
+    "distance_cm": 45.5,
+    "motion_detected": true,
+    "occupancy_status": "NORMAL"
+}
+```
+
+Example API integration concept:
+
+```python
+import requests
+
+url = "http://127.0.0.1:8000/api/sensor-data"
+
+payload = {
+    "device_id": "RETAIL_ESP32_01",
+    "visitor_count": 12,
+    "distance_cm": 45.5,
+    "motion_detected": True,
+    "occupancy_status": "NORMAL"
+}
+
+response = requests.post(url, json=payload)
+
+print(response.status_code)
+```
+
+This is an integration example. The corresponding FastAPI endpoint must be implemented before using it.
+
+For a separate ESP32 and laptop connected over Wi-Fi, use the laptop's local network IP address instead of `127.0.0.1`.
+
+---
+
+# 🧠 8. AI Retail Analytics
+
+The platform combines computer vision telemetry and historical retail data to provide business intelligence.
+
+## 8.1 Predictive Purchase Modeling
+
+Uses a Gradient Boosting classifier to estimate purchase probability based on visitor behavior.
+
+Possible input features:
+
+- Zone activity.
+- Dwell time.
+- Demographic estimates.
+- Historical purchase outcomes.
+
+## 8.2 Revenue & Budget Optimization
+
+Uses dynamic programming and a multiple-choice knapsack optimization approach.
+
+The objective is to recommend marketing and store-layout interventions within a fixed budget.
+
+## 8.3 Seven-Day Footfall Forecasting
+
+Uses time-series forecasting approaches such as:
+
+- Seasonal Average.
+- Ridge Regression.
+
+These models estimate upcoming visitor traffic and help with staffing decisions.
+
+## 8.4 Customer Segmentation
+
+Uses K-Means clustering to group visitors based on behavioral patterns.
+
+## 8.5 A/B Testing Planner
+
+Provides an A/B testing workflow to calculate statistically valid sample sizes for in-store promotional experiments.
+
+## 8.6 AI Retail Advisor
 
 Integrates Google Gemini to provide:
 
-- Natural-language executive summaries
-- Multi-period performance comparisons
-- Interactive business analytics Q&A
-- Retail operational recommendations
+- Natural-language executive summaries.
+- Multi-period performance comparisons.
+- Interactive analytics Q&A.
+- Retail operational recommendations.
 
 ---
 
-## 📡 REST API
+# 📊 9. Streamlit Executive Dashboard
 
-The FastAPI backend exposes structured analytics for external applications.
+The dashboard provides an interactive interface for viewing store analytics.
+
+Key dashboard capabilities include:
+
+### Store Overview
+
+- Total visitors.
+- Average dwell time.
+- Zone activity.
+- Store occupancy.
+- Visitor distribution.
+
+### Customer Analytics
+
+- Customer movement.
+- Dwell-time analysis.
+- Zone engagement.
+- Estimated demographic distribution.
+
+### Spatial Heatmap
+
+Displays the generated heatmap to identify customer hotspots and low-traffic areas.
+
+### Predictive Analytics
+
+Displays:
+
+- Purchase probability.
+- Footfall forecasts.
+- Customer segmentation.
+- Revenue optimization.
+
+### Electronics Monitoring
+
+The proposed hardware integration can display:
+
+- ESP32 connection status.
+- Live visitor counter.
+- IR sensor events.
+- Ultrasonic distance.
+- PIR motion status.
+- Occupancy alerts.
+
+### AI Retail Advisor
+
+Provides business recommendations using the Google Gemini integration.
+
+---
+
+# 🌐 10. FastAPI Backend
+
+The FastAPI backend acts as the communication layer between the processing pipeline, database, hardware integration and dashboard.
+
+Main responsibilities:
+
+- Exposing REST endpoints.
+- Retrieving visitor records.
+- Providing zone analytics.
+- Aggregating store performance.
+- Receiving ESP32 sensor data.
+- Providing analytics to the dashboard.
 
 Start the backend:
 
@@ -327,169 +781,466 @@ Start the backend:
 uvicorn api:app --reload
 ```
 
-Open the interactive API documentation:
+API base URL:
+
+```text
+http://127.0.0.1:8000
+```
+
+Interactive Swagger documentation:
 
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-The API provides access to visitor telemetry, zone performance, and analytics through REST endpoints.
+---
+
+# 🗄️ 11. Database & Data Storage
+
+The system uses SQLite to store retail analytics and visitor telemetry.
+
+### Live Video Database
+
+`video_data.db`
+
+Stores visitor sessions generated by the computer vision pipeline.
+
+### Synthetic Retail Database
+
+`retail_data.db`
+
+Contains generated historical retail data for machine learning, forecasting and analytics.
+
+### Potential Hardware Telemetry
+
+The electronics extension can store:
+
+- Device ID.
+- Sensor readings.
+- Visitor count.
+- Distance measurements.
+- Motion events.
+- Occupancy status.
+- Event timestamps.
 
 ---
 
-## 🔄 End-to-End Data Flow
+# 🛠️ 12. Complete Technology Stack
+
+| Category | Technology |
+|---|---|
+| Programming Language | Python |
+| Microcontroller | ESP32 |
+| Embedded Programming | Arduino IDE / ESP32 Arduino Core |
+| Computer Vision | OpenCV |
+| Object Detection | Ultralytics YOLOv8 |
+| Object Tracking | DeepSORT |
+| Machine Learning | Scikit-learn |
+| Numerical Processing | NumPy |
+| Data Analysis | Pandas |
+| Backend | FastAPI |
+| API Server | Uvicorn |
+| Database | SQLite |
+| ORM | SQLAlchemy |
+| Dashboard | Streamlit |
+| Visualization | Plotly |
+| Generative AI | Google Gemini API |
+| Hardware Communication | Wi-Fi / Serial |
+| Sensors | IR, HC-SR04, PIR |
+| Display | 16x2 LCD with I2C |
+| Output Devices | LED and Buzzer |
+
+---
+
+# 💻 13. Hardware Requirements
+
+## Computer / Processing Unit
+
+| Component | Minimum | Recommended |
+|---|---|---|
+| CPU | Intel Core i5 / Ryzen 5 | Intel Core i7 / Ryzen 7 |
+| RAM | 8 GB | 16–32 GB |
+| GPU | Integrated graphics | NVIDIA RTX GPU |
+| Storage | 10 GB free | 50 GB+ SSD |
+| Operating System | Windows 10/11 | Windows 11 / Ubuntu |
+
+A dedicated NVIDIA GPU is recommended for faster computer vision inference, but CPU inference is also possible.
+
+## Camera Requirements
+
+- 1080p Full HD camera.
+- Approximately 30 FPS.
+- USB webcam or IP CCTV.
+- RTSP support for IP camera integration.
+
+## Optional Edge AI Hardware
+
+For future standalone deployment, the system can be adapted to:
+
+- NVIDIA Jetson Orin Nano.
+- NVIDIA Jetson Xavier NX.
+- Raspberry Pi for selected lightweight sensor and control tasks.
+
+The ESP32 is used for sensor control and does not replace the computer required for full YOLOv8 and DeepSORT processing.
+
+---
+
+# 🚀 14. Quick Start & Installation
+
+## Step 1: Clone the Repository
+
+```bash
+git clone https://github.com/saurabhsinghrdjim2-cmd/retail-intelligence-system.git
+
+cd retail-intelligence-system
+```
+
+## Step 2: Create a Python Virtual Environment
+
+### Windows PowerShell
+
+```powershell
+python -m venv venv
+
+.\venv\Scripts\Activate.ps1
+```
+
+### Linux / macOS
+
+```bash
+python3 -m venv venv
+
+source venv/bin/activate
+```
+
+## Step 3: Install Dependencies
+
+```bash
+python -m pip install --upgrade pip
+
+pip install -r requirements.txt
+```
+
+If the repository does not contain a complete requirements file, install the required packages individually according to the actual project imports.
+
+## Step 4: Configure Environment Variables
+
+If you use Google Gemini, configure your API key.
+
+Example:
 
 ```text
-                 CCTV / Video
-                      |
-                      v
-              OpenCV Frame Reader
-                      |
-                      v
-                YOLOv8 Detection
-                      |
-                      v
-              DeepSORT Tracking
-                      |
-             +--------+--------+
-             |                 |
-             v                 v
-       Visitor Analytics   Movement Data
-             |                 |
-       +-----+-----+           v
-       |     |     |      Heatmap Engine
-       v     v     v           |
-      Zone  Dwell Demographic  v
-       |     |     |    heatmap_output.png
-       +-----+-----+
-             |
-             v
-          SQLite DB
-             |
-       +-----+------+
-       |            |
-       v            v
-    FastAPI     ML Analytics
-       |            |
-       +------+-----+
-              |
-              v
-      Streamlit Dashboard
-              |
-              v
-       Executive Insights
-              |
-              v
-       Gemini AI Advisor
+GEMINI_API_KEY=your_api_key_here
+```
+
+Do not commit API keys or other secrets to GitHub.
+
+---
+
+# ▶️ 15. Running the Software
+
+The repository contains the following main modules:
+
+| File | Responsibility |
+|---|---|
+| `vision_pipeline.py` | YOLOv8 detection, DeepSORT tracking and movement analytics |
+| `dashboard.py` | Streamlit executive dashboard |
+| `api.py` | FastAPI backend |
+| `generator.py` | Synthetic retail data generation |
+| `data_sources.py` | Retail data access |
+| `analytics.py` | Analytics processing |
+| `advanced.py` | Advanced analytical functionality |
+| `insights.py` | Retail insights |
+| `gemini_advisor.py` | Gemini AI integration |
+| `train_model.py` | Machine learning model training |
+| `generate_mock_db.py` | Mock database generation |
+| `requirements.txt` | Python dependencies |
+
+### Terminal 1 — Computer Vision Pipeline
+
+```powershell
+python vision_pipeline.py
+```
+
+If your pipeline requires a video argument, provide the actual video filename:
+
+```powershell
+python vision_pipeline.py --video store.mp4 --fresh
+```
+
+### Terminal 2 — FastAPI Backend
+
+```powershell
+uvicorn api:app --reload --port 8000
+```
+
+### Terminal 3 — Streamlit Dashboard
+
+```powershell
+streamlit run dashboard.py
+```
+
+Dashboard:
+
+```text
+http://localhost:8501
+```
+
+API:
+
+```text
+http://127.0.0.1:8000
+```
+
+API documentation:
+
+```text
+http://127.0.0.1:8000/docs
 ```
 
 ---
 
-## 🎯 Business Use Cases
+# 🔧 16. Electronics Setup & Execution
 
-### Store Layout Optimization
+## Step 1: Install Arduino IDE
 
-Identify areas receiving high or low customer traffic and use those patterns to inform product placement and store-layout decisions.
+Install Arduino IDE and configure ESP32 board support.
 
-### Customer Engagement
+## Step 2: Connect ESP32
 
-Measure how long visitors spend in specific product areas.
+Connect the ESP32 to your computer using a USB cable.
 
-### Checkout Monitoring
+## Step 3: Install Required Libraries
 
-Identify long dwell times around checkout areas and detect potential congestion.
+Depending on the selected implementation, install:
 
-### Staffing Optimization
+- LiquidCrystal_I2C.
+- ESP32 Arduino Core.
+- Required sensor libraries.
 
-Use traffic patterns to understand when additional employees may be required.
+## Step 4: Connect Sensors
 
-### Product Placement Analysis
+Connect the IR, HC-SR04 and PIR sensors using the suggested GPIO configuration.
 
-Compare visitor activity around different store zones.
+Connect the LCD, LEDs and buzzer.
 
-### Customer Journey Analysis
+Follow the electrical safety notes in the hardware section.
 
-Analyze visitor movement between different store areas using tracked visitor trajectories.
+## Step 5: Upload ESP32 Firmware
 
-### Executive Reporting
+Write and upload firmware to:
 
-Generate summarized analytics and reports for store managers and business stakeholders.
+- Read sensor values.
+- Detect entry and exit sequences.
+- Calculate visitor counts.
+- Update the LCD.
+- Control LEDs.
+- Trigger buzzer alerts.
+- Send sensor information to the Python backend.
+
+## Step 6: Connect ESP32 to Wi-Fi
+
+Configure the ESP32 with your local Wi-Fi credentials.
+
+The ESP32 and backend computer should be able to communicate over the same network.
+
+## Step 7: Integrate with FastAPI
+
+Implement the sensor-data endpoint in FastAPI and send sensor readings from the ESP32.
+
+## Step 8: Display Sensor Data
+
+Connect the incoming sensor information to the SQLite database and Streamlit dashboard.
 
 ---
 
-## 🔐 Privacy & Responsible AI
+# 🔄 17. Complete End-to-End Data Flow
 
-This project is intended as a technical retail-analytics prototype.
+```text
+                    SMART RETAIL STORE
+                            |
+                 +----------+----------+
+                 |                     |
+                 v                     v
+             CCTV CAMERA          IR / PIR / HC-SR04
+                 |                     |
+                 v                     v
+              OpenCV                 ESP32
+                 |                     |
+                 v                     v
+              YOLOv8             Sensor Processing
+                 |
+                 v
+              DeepSORT
+                 |
+                 v
+           Customer Tracking
+                 |
+                 +----------+
+                            |
+                            v
+                     Python Backend
+                            |
+                   +--------+--------+
+                   |                 |
+                   v                 v
+               SQLite DB       Analytics Engine
+                   |                 |
+                   +--------+--------+
+                            |
+                            v
+                          FastAPI
+                            |
+                            v
+                    Streamlit Dashboard
+                            |
+                 +----------+----------+
+                 |          |          |
+                 v          v          v
+                LCD         LED      BUZZER
+                            |
+                            v
+                      STORE MANAGER
+```
 
-For production deployments, additional considerations should be implemented:
+---
+
+# 🎯 18. Real-World Business Applications
+
+## Store Layout Optimization
+
+Identify high-traffic and low-traffic areas to improve store layout and product placement.
+
+## Customer Engagement
+
+Analyze how long customers spend browsing specific product zones.
+
+## Checkout Monitoring
+
+Identify checkout congestion and monitor average customer dwell time.
+
+## Staffing Optimization
+
+Use historical traffic and predicted visitor counts to plan employee schedules.
+
+## Customer Journey Analysis
+
+Understand how visitors move between different store zones.
+
+## Smart Store Automation
+
+Use electronic sensors to detect entry, movement and occupancy conditions.
+
+## Executive Reporting
+
+Generate retail performance summaries and analytics for store managers.
+
+---
+
+# 🔐 19. Privacy & Responsible AI
+
+This project is intended as a technical retail analytics prototype.
+
+Production deployment should consider:
 
 - Appropriate customer consent and notification.
-- Compliance with applicable privacy regulations.
-- Secure data storage and transmission.
-- Data-retention and deletion policies.
-- Role-based access control.
-- Model-accuracy evaluation.
+- Applicable privacy regulations.
+- Secure data storage.
+- Data retention and deletion policies.
+- Access control.
+- Model accuracy evaluation.
 - Bias and fairness evaluation.
-- Appropriate handling of CCTV footage.
-- Clear policies for access to and use of analytics.
+- Appropriate CCTV footage handling.
 
-Where possible, production deployments should minimize the retention of identifiable video and use aggregated analytics for reporting.
+Demographic classification produces model estimates and should not be treated as verified personal information.
+
+Where possible, minimize the retention of identifiable video and use aggregated analytics.
 
 ---
 
-## 📈 Future Improvements
+# 📈 20. Future Improvements
 
 Potential improvements include:
 
-- 🔴 Live multi-camera CCTV/IP streaming.
-- 🧠 More advanced customer-behavior analysis.
-- 📦 Product detection and shelf monitoring.
-- 🛍️ Product-level interaction tracking.
-- 🚨 Real-time anomaly detection.
-- 📱 Mobile analytics dashboard.
-- ☁️ Cloud-based deployment.
-- 🔔 Real-time alerts through Slack/email.
-- 📊 Historical trend analysis.
-- 👥 Customer-journey visualization.
-- ⚡ TensorRT / ONNX edge-GPU optimization.
-- 🔄 Real-time streaming analytics.
-- 🏬 Multi-store analytics.
-- 📈 Advanced retail forecasting models.
+### AI & Computer Vision
+
+- Advanced customer behavior analysis.
+- Product detection.
+- Shelf monitoring.
+- Product interaction tracking.
+- Real-time anomaly detection.
+- Improved customer journey visualization.
+
+### IoT & Electronics
+
+- Multiple ESP32 sensor nodes.
+- Wireless sensor communication.
+- Additional store occupancy sensors.
+- Automated checkout alerts.
+- Smart digital signage.
+- Automatic lighting control.
+- Integration with RFID.
+- Energy monitoring.
+
+### Software & Cloud
+
+- Mobile analytics dashboard.
+- Cloud-based deployment.
+- Real-time notifications through Slack/email.
+- LLM-powered retail analytics.
+- Historical trend analysis.
+- Multi-store analytics.
+- TensorRT / ONNX GPU optimization.
+- Real-time streaming analytics.
 
 ---
 
-## 📂 Project Structure
+# 📂 21. Project Structure
 
 ```text
-autonomous-retail-intelligence-system/
+retail-intelligence-system/
 │
-├── api.py                  # FastAPI REST endpoints for telemetry and analytics
-├── dashboard.py            # Main 8-tab Streamlit executive dashboard
-├── vision_pipeline.py      # YOLOv8 + DeepSORT detection, tracking and heatmap generator
-├── generator.py            # Synthetic data generator and behavioral simulator
-├── zones.json              # Saved spatial coordinates for monitored store zones
-├── requirements.txt        # Python package dependencies
-├── .gitignore              # Excludes virtual environments, model weights and local databases
-└── README.md               # Project documentation
+├── vision_pipeline.py       # Computer vision and visitor tracking
+├── dashboard.py             # Streamlit executive dashboard
+├── api.py                   # FastAPI backend
+├── generator.py             # Synthetic retail data generation
+├── data_sources.py          # Data access and sources
+├── analytics.py             # Retail analytics
+├── advanced.py              # Advanced analytics
+├── insights.py              # Operational insights
+├── gemini_advisor.py        # Gemini AI integration
+├── train_model.py           # Machine learning training
+├── generate_mock_db.py      # Mock database generation
+│
+├── zones.json               # Store zone configuration
+├── requirements.txt         # Python dependencies
+│
+├── video_data.db            # Live visitor data
+├── retail_data.db           # Historical/synthetic retail data
+├── heatmap_output.png       # Generated movement heatmap
+│
+├── venv/                    # Python virtual environment
+└── README.md                # Project documentation
 ```
+
+The ESP32 firmware and circuit diagrams can be added in a separate hardware directory as the electronics implementation is developed.
 
 ---
 
-## 📜 License
+# 📜 22. License
 
 This project is licensed under the MIT License.
 
 ---
 
-## 👨‍💻 Author
+# 👨‍💻 23. Author
 
 **Suryansh Vaish**
 
-- GitHub: [suryanshvaish1](https://github.com/suryanshvaish1)
-- Repository: [Autonomous Retail Intelligence System](https://github.com/suryanshvaish1/autonoumous-retail-intelligence-system)
+GitHub: [suryanshvaish1](https://github.com/suryanshvaish1)
 
 ---
 
-## ⭐ If You Find This Project Useful
+# ⭐ If You Find This Project Useful
 
 Consider giving the repository a ⭐ on GitHub!
