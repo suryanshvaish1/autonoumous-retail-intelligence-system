@@ -152,6 +152,7 @@ Based on the sensor readings, it can:
 - Trigger occupancy alerts.
 
 The ESP32 communicates with the Python backend through Wi-Fi or serial communication.
+![ESP32 Hardware Circuit Diagram](assets/circuit-diagram.png)
 
 ### Layer 4: Data Processing & Storage
 
