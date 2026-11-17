@@ -885,6 +885,58 @@ For future standalone deployment, the system can be adapted to:
 The ESP32 is used for sensor control and does not replace the computer required for full YOLOv8 and DeepSORT processing.
 
 ---
+Project File Structure & Descriptions
+vision_pipeline.py
+
+Acts as the core computer vision engine. It captures video frames, runs Ultralytics YOLOv8 for real-time person detection, executes DeepSORT for multi-object tracking across frames, maps store zones (ROIs), and generates foot-traffic density heatmaps.
+
+dashboard.py
+
+Renders the interactive executive web interface using Streamlit. It displays live store occupancy metrics, dwell-time analytics, zone engagement distributions, footfall forecasting, and automated recommendations from the AI advisor.
+
+api.py
+
+Hosts the FastAPI backend server. It exposes REST endpoints to process client requests, serve analytics data, and ingest live JSON telemetry sent over Wi-Fi by the ESP32 hardware module.
+
+generator.py
+
+Responsible for generating synthetic retail datasets used for training machine learning models, simulating store visitor traffic, and testing analytics pipelines without needing live camera feeds.
+
+generate_mock_db.py
+
+Automatically creates and seeds mock SQLite databases (video_data.db and retail_data.db) with initial historical records for rapid testing and demonstration.
+
+data_sources.py
+
+Manages database connectivity, data access layers, and query execution to fetch visitor telemetry and historical retail data for the backend and dashboard.
+
+analytics.py
+
+Implements core statistical and machine learning models, including customer segmentation using K-Means clustering, dwell-time calculations, and footfall analysis.
+
+advanced.py
+
+Handles advanced analytical operations, such as predictive purchase probability modeling via Gradient Boosting and revenue/budget optimization algorithms.
+
+insights.py
+
+Aggregates processed analytics data to generate operational insights and performance summaries for store managers.
+
+gemini_advisor.py
+
+Integrates the Google Gemini API to power the AI Retail Advisor, providing natural-language executive summaries, multi-period comparisons, and interactive analytics Q&A.
+
+train_model.py
+
+Handles the training, evaluation, and serialization of the machine learning models used for footfall forecasting and customer behavior prediction.
+
+zones.json
+
+Configuration file containing coordinate boundaries for predefined store Regions of Interest (ROIs) such as shelf displays, customer areas, and checkouts.
+
+requirements.txt
+
+Lists all required third-party Python packages and dependencies (OpenCV, Ultralytics, FastAPI, Streamlit, Pandas, NumPy, etc.) needed to run the project.
 
 # 🚀 14. Quick Start & Installation
 
